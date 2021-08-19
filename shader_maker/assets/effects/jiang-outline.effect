@@ -1,0 +1,113 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        alphaThreshold: { value: 0.5 }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <cc-global>
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+    pos = cc_matViewProj * pos;
+    uv0 = a_texCoord;
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <embedded-alpha>
+  #include <alpha-test>
+
+  in vec4 color;
+  in vec2 uv0;
+  #pragma builtin(local)
+  layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
+
+  bool checkIsMakeOutline (vec2 pos) {
+    float outlineWidth = 0.01;
+    float alpha = 0.1;
+    vec4 centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos);
+    if (centerColor.a <= alpha) {
+      return false;
+    };
+
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(-outlineWidth, -outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(-outlineWidth, 0));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(-outlineWidth, outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(0, -outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(0, +outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(+outlineWidth, -outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(+outlineWidth, 0));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+    centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos + vec2(+outlineWidth, outlineWidth));
+    if (centerColor.a <= alpha) {
+      return true;
+    };
+
+    if (pos.x <= outlineWidth || 1.0 - outlineWidth <= pos.x) {
+      return true;
+    };
+    if (pos.y <= outlineWidth || 1.0 - outlineWidth <= pos.y) {
+      return true;
+    };
+
+    return false;
+  }
+
+  vec4 frag () {
+    if (checkIsMakeOutline(uv0)) {
+      return vec4(1, 0, 0, 1);
+    };
+
+    vec4 o = vec4(1, 1, 1, 1);
+    o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+    o *= color;
+    ALPHA_TEST(o);
+    return o;
+  }
+}%

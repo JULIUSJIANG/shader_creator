@@ -266,9 +266,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 43,
-      "g": 43,
-      "b": 43,
+      "r": 75,
+      "g": 75,
+      "b": 75,
       "a": 255
     },
     "_spriteFrame": {
@@ -408,7 +408,10 @@
       "__id__": 15
     },
     "_visFlags": 0,
-    "_customMaterial": null,
+    "_customMaterial": {
+      "__uuid__": "b2d217c0-7187-4ed7-9ea4-1716a42cc68b",
+      "__expectedType__": "cc.Material"
+    },
     "_srcBlendFactor": 2,
     "_dstBlendFactor": 4,
     "_color": {

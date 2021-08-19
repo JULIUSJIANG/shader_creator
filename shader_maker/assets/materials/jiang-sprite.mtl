@@ -4,15 +4,12 @@
   "_objFlags": 0,
   "_native": "",
   "_effectAsset": {
-    "__uuid__": "60f7195c-ec2a-45eb-ba94-8955f60e81d0",
+    "__uuid__": "fb96f1f3-7b0d-4f0b-b0e5-a64e61d9edcf",
     "__expectedType__": "cc.EffectAsset"
   },
   "_techIdx": 0,
   "_defines": [
-    {
-      "USE_TEXTURE": true,
-      "IS_GRAY": true
-    }
+    {}
   ],
   "_states": [
     {

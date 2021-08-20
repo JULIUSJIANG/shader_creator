@@ -18,9 +18,9 @@
         "imageUuidOrDatabaseUri": "14435b53-ed93-4fee-86a7-fe111dd0da9b",
         "wrapModeS": "repeat",
         "wrapModeT": "repeat",
-        "minfilter": "linear",
-        "magfilter": "linear",
-        "mipfilter": "none",
+        "minfilter": "nearest",
+        "magfilter": "nearest",
+        "mipfilter": "nearest",
         "anisotropy": 0,
         "isUuid": true
       },

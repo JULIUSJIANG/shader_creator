@@ -367,7 +367,7 @@
       "y": 0,
       "z": 0
     },
-    "_id": "bcAVf0ry1GEYXwf2nR0Hqh"
+    "_id": "6bcBfa+KhBm6QNTjfj6bAb"
   },
   {
     "__type__": "cc.UITransform",
@@ -390,7 +390,7 @@
       "x": 0.5,
       "y": 0.5
     },
-    "_id": "556pZdcY5ANIswo8GCkzPx"
+    "_id": "3apCerGjtAu7EEAfaO/Zd5"
   },
   {
     "__type__": "cc.CompPrefabInfo",
@@ -438,7 +438,7 @@
     "_isTrimmedMode": true,
     "_useGrayscale": false,
     "_atlas": null,
-    "_id": "caCT0Ft+9HRbLl4a3v/ISk"
+    "_id": "a2BTEhFSJOo42S+Ne4r9cV"
   },
   {
     "__type__": "cc.CompPrefabInfo",

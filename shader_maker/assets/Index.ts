@@ -1,21 +1,17 @@
 
-import { _decorator, Component, Node, macro, view, CCLoader, Sprite } from 'cc';
+import { _decorator, Component, Node } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('Index')
 export class Index extends Component {
-    @property(Sprite)
-    imgPeople: Sprite = null;
+    _nodeA: Node = null;
 
-    _onEnableTime: number = 0;
+    @property(Node)
+    nodeB: Node = null;
 
-    onEnable () {
-        this._onEnableTime = Date.now();
-    }
-
-    update () {
-        let curr = Date.now();
-        let passedSecond = (curr - this._onEnableTime) / 1000;
-        this.imgPeople.material.setProperty(`ps`, passedSecond);
+    start () {
+        setTimeout(() => {
+            this.nodeB.active = true;
+        }, 1500 );
     }
 }

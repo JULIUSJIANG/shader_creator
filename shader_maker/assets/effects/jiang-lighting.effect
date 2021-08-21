@@ -18,12 +18,14 @@ CCEffect %{
       properties:
         lightWidth: { value: 0.1, target: lw }
         lightOffset: { value: 0, target: lo }
+        passedSeconds: { value: 0, target: ps }
 }%
 
 CCProgram shared-ubos %{
   uniform Constants {
     float lw;
     float lo;
+    float ps;
   };
 }%
 
@@ -42,7 +44,7 @@ CCProgram sprite-vs %{
     pos = cc_matViewProj * pos;
     uv0 = a_texCoord;
     color = a_color;
-    return pos;
+    return pos; 
   }
 }%
 
@@ -52,7 +54,7 @@ CCProgram sprite-fs %{
   #include <alpha-test>
   #include <shared-ubos>
 
-  in vec4 color; 
+  in vec4 color;  
   in vec2 uv0;
   #pragma builtin(local)
   layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
@@ -62,9 +64,13 @@ CCProgram sprite-fs %{
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
     o *= color; 
 
+    float cycle = ps - floor(ps);
+    cycle *= 2.0;
+
     float sum = uv0.x + uv0.y;
-    if (lo - lw < sum && sum < lo + lw) {
-      float distance = abs(sum - lo);
+    float border = cycle + lo;
+    if (border - lw < sum && sum < border + lw) {
+      float distance = abs(sum - border);
       float rate = distance / lw;
       vec3 white = vec3(1, 1, 1);
       return vec4(o.rgb * rate + white * (1.0 - rate), o.w);

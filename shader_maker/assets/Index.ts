@@ -4,31 +4,18 @@ const { ccclass, property } = _decorator;
 
 @ccclass('Index')
 export class Index extends Component {
-    // [1]
-    // dummy = '';
-
-    // [2]
-    // @property
-    // serializableDummy = 0;
-
     @property(Sprite)
-    bg: Sprite = null;
+    imgPeople: Sprite = null;
 
-    start () { 
+    _onEnableTime: number = 0;
+
+    onEnable () {
+        this._onEnableTime = Date.now();
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
+    update () {
+        let curr = Date.now();
+        let passedSecond = (curr - this._onEnableTime) / 1000;
+        this.imgPeople.material.setProperty(`ps`, passedSecond);
+    }
 }
-
-/**
- * [1] Class member could be defined like this.
- * [2] Use `property` decorator if your want the member to be serializable.
- * [3] Your initialization goes here.
- * [4] Your update function goes here.
- *
- * Learn more about scripting: https://docs.cocos.com/creator/3.0/manual/en/scripting/
- * Learn more about CCClass: https://docs.cocos.com/creator/3.0/manual/en/scripting/ccclass.html
- * Learn more about life-cycle callbacks: https://docs.cocos.com/creator/3.0/manual/en/scripting/life-cycle-callbacks.html
- */

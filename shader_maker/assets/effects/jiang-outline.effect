@@ -15,8 +15,6 @@ CCEffect %{
           blendDstAlpha: one_minus_src_alpha
       rasterizerState:
         cullMode: none
-      properties:
-        alphaThreshold: { value: 0.5 }
 }%
 
 CCProgram outline-vs %{
@@ -110,7 +108,6 @@ CCProgram outline-fs %{
     vec4 o = vec4(1, 1, 1, 1);
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
     o *= color;
-    ALPHA_TEST(o);
     return o;
   }
 }%

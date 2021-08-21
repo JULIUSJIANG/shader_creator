@@ -15,6 +15,16 @@ CCEffect %{
           blendDstAlpha: one_minus_src_alpha
       rasterizerState:
         cullMode: none
+      properties:
+        lightWidth: { value: 0.1, target: lw }
+        lightOffset: { value: 0, target: lo }
+}%
+
+CCProgram shared-ubos %{
+  uniform Constants {
+    float lw;
+    float lo;
+  };
 }%
 
 CCProgram sprite-vs %{
@@ -40,9 +50,9 @@ CCProgram sprite-fs %{
   precision highp float;
   #include <embedded-alpha>
   #include <alpha-test>
+  #include <shared-ubos>
 
-  in vec4 color;
-
+  in vec4 color; 
   in vec2 uv0;
   #pragma builtin(local)
   layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
@@ -50,7 +60,16 @@ CCProgram sprite-fs %{
   vec4 frag () {
     vec4 o = vec4(1, 1, 1, 1);
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
-    o *= color;
+    o *= color; 
+
+    float sum = uv0.x + uv0.y;
+    if (lo - lw < sum && sum < lo + lw) {
+      float distance = abs(sum - lo);
+      float rate = distance / lw;
+      vec3 white = vec3(1, 1, 1);
+      return vec4(o.rgb * rate + white * (1.0 - rate), o.w);
+    };
+
     return o;
   }
 }%

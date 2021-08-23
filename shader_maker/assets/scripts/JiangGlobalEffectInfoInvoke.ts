@@ -27,7 +27,7 @@ export class EffectInfoInvoke extends Component {
     }
 
     onEnable () {
-        if (this._img == null) {
+        if (this._img == null) { 
             return;
         };
 
@@ -41,6 +41,6 @@ export class EffectInfoInvoke extends Component {
         
         let curr = Date.now();
         let passedSecond = (curr - this._onEnableTime) / 1000;
-        this._img.material.setProperty(`ps`, passedSecond);
+        this._img.material.setProperty(`passedSeconds`, passedSecond);
     }
 }

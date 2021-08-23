@@ -23,6 +23,9 @@
     }
   ],
   "_props": [
-    {}
+    {
+      "oneDivideTexWidth": 0.03125,
+      "oneDivideTexHeight": 0.021739
+    }
   ]
 }

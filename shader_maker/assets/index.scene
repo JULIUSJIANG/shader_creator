@@ -415,7 +415,7 @@
     },
     "_visFlags": 0,
     "_customMaterial": {
-      "__uuid__": "5ebb0561-1f15-4e63-9476-476882a97c5e",
+      "__uuid__": "b2d217c0-7187-4ed7-9ea4-1716a42cc68b",
       "__expectedType__": "cc.Material"
     },
     "_srcBlendFactor": 2,
@@ -451,7 +451,7 @@
     "fileId": "e71ctEmpxFC4KlSYRZNz/a"
   },
   {
-    "__type__": "77fa2GkCclC1ZeYHCiJULCn",
+    "__type__": "65e05/IGSZOBpmjsKXIdCS0",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -459,7 +459,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "_id": "19+vU7FRdNEYh9aYBiF0dl"
+    "_id": "f0cBNYaXxDArP9Q3YSq9V7"
   },
   {
     "__type__": "cc.UITransform",

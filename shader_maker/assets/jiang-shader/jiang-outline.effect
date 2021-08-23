@@ -15,6 +15,16 @@ CCEffect %{
           blendDstAlpha: one_minus_src_alpha
       rasterizerState:
         cullMode: none
+      properties:
+        oneDivideTexWidth: { value: 0, target: odtw }
+        oneDivideTexHeight: { value: 0, target: odth }
+}%
+
+CCProgram shared-ubos %{
+  uniform Constants {
+    float odtw;
+    float odth;
+  };
 }%
 
 CCProgram outline-vs %{
@@ -41,16 +51,16 @@ CCProgram outline-fs %{
   #include <embedded-alpha>
   #include <alpha-test>
   #include <cc-global>
+  #include <shared-ubos>
 
   in vec4 color;
   in vec2 uv0;
   #pragma builtin(local)
   layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
 
-  bool checkIsMakeOutline (vec2 pos) {
-    float scale = 10.0;
-    float horWeight = cc_screenSize.zw.x * scale;
-    float verWeight = cc_screenSize.zw.x * scale;
+  bool checkIsMakeOutline (vec2 pos) { 
+    float horWeight = odtw;
+    float verWeight = odth;
     float alpha = 0.1;
     vec4 centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos);
     if (centerColor.a <= alpha) {

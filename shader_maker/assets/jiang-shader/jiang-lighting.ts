@@ -2,8 +2,8 @@
 import { _decorator, Component, Node, macro, view, CCLoader, Sprite, Material, renderer } from 'cc';
 const { ccclass, property } = _decorator;
 
-@ccclass('EffectInfoInvoke')
-export class JiangGlobal extends Component {
+@ccclass('JiangLighting')
+export class JiangLighting extends Component {
     _img: Sprite = null;
     _onEnableTime: number = 0;
 
@@ -12,17 +12,9 @@ export class JiangGlobal extends Component {
     }
 
     start () {
-        let textureWidth = this._img.spriteFrame.texture.width;
-        let oneDivideTexWidth = 1 / textureWidth;
-        let textureHeight = this._img.spriteFrame.texture.height;
-        let oneDivideTexHeight = 1 / textureHeight;
         for (let i = 0; i < this._img.materials.length; i++) {
             let originMat = this._img.materials[i];
             this._img.materials[i] = new renderer.MaterialInstance({parent: originMat});
-            this._img.materials[i].setProperty(`textureWidth`, textureWidth);
-            this._img.materials[i].setProperty(`oneDivideTexWidth`, oneDivideTexWidth);
-            this._img.materials[i].setProperty(`textureHeight`, textureHeight);
-            this._img.materials[i].setProperty(`oneDivideTexHeight`, oneDivideTexHeight);
         };
     }
 

@@ -18,12 +18,14 @@ CCEffect %{
       properties:
         lightWidth: { value: 0.1, target: lw }
         lightOffset: { value: 0, target: lo }
+        passedSeconds: {valune: 0, target: ps}
 }%
 
 CCProgram shared-ubos %{
   uniform Constants {
     float lw;
     float lo;
+    float ps;
   };
 }%
 
@@ -51,7 +53,6 @@ CCProgram sprite-fs %{
   #include <embedded-alpha>
   #include <alpha-test>
   #include <shared-ubos>
-  #include "../chunks/jiang-global.chunk"
  
   in vec4 color;  
   in vec2 uv0;
@@ -63,7 +64,7 @@ CCProgram sprite-fs %{
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
     o *= color; 
 
-    float cycle = passedSeconds - floor(passedSeconds);
+    float cycle = ps - floor(ps);
     cycle *= 2.0;
 
     float sum = uv0.x + uv0.y;

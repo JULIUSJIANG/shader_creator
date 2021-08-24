@@ -16,20 +16,30 @@ CCEffect %{
       rasterizerState:
         cullMode: none
       properties:
+        texWidth: { value: 0, target: tw }
         oneDivideTexWidth: { value: 0, target: odtw }
+        texHeight: { value: 0, target: th }
         oneDivideTexHeight: { value: 0, target: odth }
+        horScale: { value: 1, target: hs }
+        verScale: { value: 1, target: vs }
 }%
 
 CCProgram shared-ubos %{
   uniform Constants {
+    float tw;
     float odtw;
+    float th;
     float odth;
+    float hs;
+    float vs;
   };
 }%
 
 CCProgram outline-vs %{
   precision highp float;
   #include <cc-global>
+  #include <shared-ubos>
+
   in vec3 a_position;
   in vec2 a_texCoord;
   in vec4 a_color;
@@ -42,6 +52,7 @@ CCProgram outline-vs %{
     pos = cc_matViewProj * pos;
     uv0 = a_texCoord;
     color = a_color;
+
     return pos;
   }
 }%
@@ -50,7 +61,7 @@ CCProgram outline-fs %{
   precision highp float;
   #include <embedded-alpha>
   #include <alpha-test>
-  #include <cc-global>
+  #include <cc-global> 
   #include <shared-ubos>
 
   in vec4 color;
@@ -59,8 +70,8 @@ CCProgram outline-fs %{
   layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
 
   bool checkIsMakeOutline (vec2 pos) { 
-    float horWeight = odtw;
-    float verWeight = odth;
+    float horWeight = odtw / hs;
+    float verWeight = odth / vs;
     float alpha = 0.1;
     vec4 centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos);
     if (centerColor.a <= alpha) {
@@ -100,10 +111,10 @@ CCProgram outline-fs %{
       return true;
     };
 
-    if (pos.x <= horWeight || 1.0 - verWeight <= pos.x) {
+    if (pos.x <= horWeight || 1.0 - horWeight <= pos.x) {
       return true;
     };
-    if (pos.y <= horWeight || 1.0 - verWeight <= pos.y) { 
+    if (pos.y <= verWeight || 1.0 - verWeight <= pos.y) { 
       return true;
     };
 
@@ -118,6 +129,7 @@ CCProgram outline-fs %{
     vec4 o = vec4(1, 1, 1, 1);
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
     o *= color;
+
     return o;
   }
 }%

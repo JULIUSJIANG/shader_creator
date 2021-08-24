@@ -22,6 +22,7 @@ CCEffect %{
         oneDivideTexHeight: { value: 0, target: odth }
         horScale: { value: 1, target: hs }
         verScale: { value: 1, target: vs }
+        lineScale: { value: 1, target: ls }
 }%
 
 CCProgram shared-ubos %{
@@ -32,6 +33,7 @@ CCProgram shared-ubos %{
     float odth;
     float hs;
     float vs;
+    float ls;
   };
 }%
 
@@ -70,8 +72,8 @@ CCProgram outline-fs %{
   layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
 
   bool checkIsMakeOutline (vec2 pos) { 
-    float horWeight = odtw / hs;
-    float verWeight = odth / vs;
+    float horWeight = odtw / hs * ls;
+    float verWeight = odth / vs * ls;
     float alpha = 0.1;
     vec4 centerColor = CCSampleWithAlphaSeparated(cc_spriteTexture, pos);
     if (centerColor.a <= alpha) {

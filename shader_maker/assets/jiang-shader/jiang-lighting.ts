@@ -30,12 +30,5 @@ export class JiangLighting extends Component {
         if (this._img == null) {
             return;
         };
-        
-        let curr = Date.now();
-        let passedSeconds = (curr - this._onEnableTime) / 1000;
-        for (let i = 0; i < this._img.materials.length; i++) {
-            let mat = this._img.materials[i];
-            mat.setProperty(`passedSeconds`, passedSeconds);
-        };
     }
 }

@@ -18,14 +18,12 @@ CCEffect %{
       properties:
         lightWidth: { value: 0.1, target: lw }
         lightOffset: { value: 0, target: lo }
-        passedSeconds: {valune: 0, target: ps}
 }%
 
 CCProgram shared-ubos %{
   uniform Constants {
     float lw;
     float lo;
-    float ps;
   };
 }%
 
@@ -44,12 +42,13 @@ CCProgram sprite-vs %{
     pos = cc_matViewProj * pos;
     uv0 = a_texCoord;
     color = a_color;
-    return pos; 
+    return pos;  
   }
 }%
 
 CCProgram sprite-fs %{
   precision highp float;
+  #include <cc-global>
   #include <embedded-alpha>
   #include <alpha-test>
   #include <shared-ubos>
@@ -64,7 +63,7 @@ CCProgram sprite-fs %{
     o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
     o *= color; 
 
-    float cycle = ps - floor(ps);
+    float cycle = cc_time.x - floor(cc_time.x);
     cycle *= 2.0;
 
     float sum = uv0.x + uv0.y;

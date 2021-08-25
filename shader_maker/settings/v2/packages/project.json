@@ -2,8 +2,20 @@
   "__version__": "1.0.1",
   "general": {
     "designResolution": {
-      "width": 64,
-      "height": 128
+      "width": 960,
+      "height": 640,
+      "fitHeight": true,
+      "fitWidth": false
     }
-  }
+  },
+  "layer": [
+    {
+      "name": "cont",
+      "value": 1
+    },
+    {
+      "name": "display",
+      "value": 2
+    }
+  ]
 }

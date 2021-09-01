@@ -9,6 +9,8 @@ import dataStorage from "./scripts/DataStorage";
 import ViewBlockEdit from "./scripts/ViewBlockEdit";
 import BtnBlock from "./scripts/BtnBlock";
 import ColorRecord from "./scripts/ColorRecord";
+import utilTexture2D from "./scripts/UtilTexture2D";
+import globalConfig from "./scripts/GlobalConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -49,6 +51,11 @@ export default class Index extends cc.Component {
      */
     @property(cc.Node)
     public btnAddBlock: cc.Node = null;
+    /**
+     * 背景网格精灵
+     */
+    @property(cc.Sprite)
+    public grid: cc.Sprite = null;
 
     public static inst: Index;
 
@@ -62,6 +69,20 @@ export default class Index extends cc.Component {
             dataStorage.vo.colorPool.push(new ColorRecord());
             this.refreshLeftNav();
         });
+
+        this.grid.spriteFrame = utilTexture2D.grid(
+            globalConfig.designWidth,
+            globalConfig.designHeight,
+            globalConfig.gridPixel,
+            []
+        );
+
+        let onTouched = (args) => {
+            var location = args.currentTouch.getLocation();
+            console.log(`${location.x} ${location.y}`);
+        };
+        this.grid.node.on(cc.Node.EventType.TOUCH_START, onTouched);
+        this.grid.node.on(cc.Node.EventType.TOUCH_MOVE, onTouched);
     }
 
     /**

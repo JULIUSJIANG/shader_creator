@@ -60,7 +60,7 @@ export default class ViewBlockEdit extends cc.Component {
             this.refresh();
         });
         this.sliderPenetration.node.on("slide", () => {
-            this.editItem.p = this.sliderPenetration.progress * 100;
+            this.editItem.p = this.sliderPenetration.progress * 255;
             this.refresh();
         });
         this.btnCertain.on(cc.Node.EventType.TOUCH_START, () => {
@@ -90,6 +90,6 @@ export default class ViewBlockEdit extends cc.Component {
         this.sliderGreen.progress = this.editItem.g / 255;
         this.sliderBlue.progress = this.editItem.b / 255;
         this.sliderAlpha.progress = this.editItem.a / 255;
-        this.sliderPenetration.progress = this.editItem.p / 100;
+        this.sliderPenetration.progress = this.editItem.p / 255;
     }
 }

@@ -10,7 +10,11 @@ const globalConfig = {
     /**
      * 描边颜色
      */
-    outLineColor: new cc.Color(0, 0, 0, 255)
+    outLineColor: new cc.Color(0, 0, 0, 255),
+    /**
+     * 阴影的最大浓度
+     */
+    shadowAlphaMax: 225
 }
 
 export default globalConfig;

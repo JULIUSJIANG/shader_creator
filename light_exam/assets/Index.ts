@@ -347,13 +347,13 @@ export default class Index extends cc.Component {
     refreshLightPenetration () {
         // 生成光照贴图
         for (var x = 0; x < this.drawWidth; x++) {
-            for (var y = 0; y < this.drawHeigh; y++) {
+            for (var y = this.drawHeigh - 1; 0 <= y; y--) {
                 var i = (y * this.drawWidth + x) * 4;
                 var preA = 255;
-                if (0 < x && 0 < y) {
-                    preA = this.penetrationBytes[((y - 1) * this.drawWidth + (x - 1)) * 4 + 3];
+                if (0 < x && y < this.drawHeigh - 1) {
+                    preA = this.penetrationBytes[((y + 1) * this.drawWidth + (x - 1)) * 4 + 3];
                 };
-                this.penetrationBytes[i + 3] = preA * (1 - this.penetrationBytes[i + 3]);
+                this.penetrationBytes[i + 3] = preA - 255 * this.penetrationBytes[i + 3];
                 this.penetrationBytes[i + 3] = Math.max(0, this.penetrationBytes[i + 3]);
             };
         };
@@ -361,7 +361,7 @@ export default class Index extends cc.Component {
         for (var x = 0; x < this.drawWidth; x++) {
             for (var y = 0; y < this.drawHeigh; y++) {
                 var i = (y * this.drawWidth + x) * 4;
-                this.penetrationBytes[i + 3] = 255 - this.penetrationBytes[i + 3];
+                this.penetrationBytes[i + 3] = Math.min( 255 - this.penetrationBytes[i + 3], globalConfig.shadowAlphaMax);
             };
         };
     }

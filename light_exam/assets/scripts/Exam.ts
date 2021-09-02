@@ -57,15 +57,6 @@ export default class Exam extends cc.Component {
                 bytes[i + 3] = a;
             };
         };
-        
-        tex.initWithData(new Uint8Array(bytes), cc.Texture2D.PixelFormat.RGBA8888, width, height);
-        spriteFrame.setTexture(tex);
-        var end = Date.now();
-        console.log(`创建纹理[${width}]*[${height}]耗时[${end - begin}]`);
-        return spriteFrame;
-    }
-
-    verReverse (width: number, height: number, bytes: number[]) {
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 var i = (y * width + x) * 4;
@@ -85,5 +76,10 @@ export default class Exam extends cc.Component {
                 bytes[i + 3] = Math.max(0, bytes[i + 3]);
             };
         };
+        tex.initWithData(new Uint8Array(bytes), cc.Texture2D.PixelFormat.RGBA8888, width, height);
+        spriteFrame.setTexture(tex);
+        var end = Date.now();
+        console.log(`创建纹理[${width}]*[${height}]耗时[${end - begin}]`);
+        return spriteFrame;
     }
 }

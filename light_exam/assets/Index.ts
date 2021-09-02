@@ -99,7 +99,7 @@ export default class Index extends cc.Component {
     /**
      * 颜色数据集
      */
-    bytes: number[] = [];
+    blockBytes: number[] = [];
 
     start () {
         Index.inst = this;
@@ -130,7 +130,7 @@ export default class Index extends cc.Component {
             this.texWidth,
             this.texHeight,
             globalConfig.gridPixel,
-            this.bytes
+            this.blockBytes
         );
 
         // 监听交互
@@ -140,8 +140,8 @@ export default class Index extends cc.Component {
             var gridY = Math.floor(location.y / globalConfig.gridPixel);
             this.btnList[dataStorage.vo.editTypeIndex].onGrid(gridX, gridY);
         };
-        this.grid.node.on(cc.Node.EventType.TOUCH_START, onTouched);
-        this.grid.node.on(cc.Node.EventType.TOUCH_MOVE, onTouched);
+        this.display.node.on(cc.Node.EventType.TOUCH_START, onTouched);
+        this.display.node.on(cc.Node.EventType.TOUCH_MOVE, onTouched);
 
         this.refreshGridDraw();
     }
@@ -232,18 +232,61 @@ export default class Index extends cc.Component {
         });
     }
 
-    uint8Arr = new Uint8Array();
-
+    /**
+     * 绘制方块的贴图
+     */
     spr = new cc.SpriteFrame();
 
+    /**
+     * h方块的纹理
+     */
     tex = new cc.Texture2D();
 
     /**
      * 刷新格子绘制
      */
     refreshGridDraw () {
-        var t0 = Date.now();
-        this.bytes.fill(null)
+        // 刷新方块贴图
+        this.refreshCurrBlockTextureBytes();
+        // 刷新光照贴图
+        this.refreshLightPenetration();
+        // 刷新光影混合
+        this.refreshLightBlend();
+        // 上下反转
+        utilTexture2D.verReverse(this.drawWidth, this.drawHeigh, this.blockBytes);
+        // 绘制
+        this.tex.initWithData(new Uint8Array(this.blockBytes), cc.Texture2D.PixelFormat.RGBA8888, this.drawWidth, this.drawHeigh);
+        this.spr.setTexture(this.tex);
+        this.display.spriteFrame = this.spr;
+    }
+
+    /**
+     * 渗透纹理的数据
+     */
+    penetrationBytes: number[] = [];
+
+    /***
+     * 刷新方块的纹理数据
+     */
+    refreshCurrBlockTextureBytes () {
+        this.blockBytes.fill(null);
+        this.penetrationBytes.fill(null);
+        // 初始化默认颜色
+        for (var x = 0; x < this.drawWidth; x++) {
+            for (var y = 0; y < this.drawHeigh; y++) {
+                var i = (y * this.drawWidth + x) * 4;
+                this.blockBytes[i] = 255;
+                this.blockBytes[i + 1] = 255;
+                this.blockBytes[i + 2] = 255;
+                this.blockBytes[i + 3] = 0;
+
+                this.penetrationBytes[i] = 0;
+                this.penetrationBytes[i + 1] = 0;
+                this.penetrationBytes[i + 2] = 0;
+                this.penetrationBytes[i + 3] = 0;
+            };
+        };
+
         for (let y = 0; y < dataStorage.vo.gridRec.length; y++) {
             var xLine = dataStorage.vo.gridRec[y];
             if (xLine == null) {
@@ -282,23 +325,61 @@ export default class Index extends cc.Component {
                             b = globalConfig.outLineColor.b;
                             a = globalConfig.outLineColor.a;
                         };
-                        this.bytes[index] = r;
-                        this.bytes[index + 1] = g;
-                        this.bytes[index + 2] = b;
-                        this.bytes[index + 3] = a;
+                        this.blockBytes[index] = r;
+                        this.blockBytes[index + 1] = g;
+                        this.blockBytes[index + 2] = b;
+                        this.blockBytes[index + 3] = a;
+
+                        this.penetrationBytes[index] = 0;
+                        this.penetrationBytes[index + 1] = 0;
+                        this.penetrationBytes[index + 2] = 0;
+                        // 每像素拦截多少百分比的光
+                        this.penetrationBytes[index + 3] = colorRec.p / 100 / globalConfig.drawPixel;
                     };
                 };
             };
         };
-        var t1 = Date.now();
-        utilTexture2D.verReverse(this.drawWidth, this.drawHeigh, this.bytes);
-        var t2 = Date.now();
-        this.tex.initWithData(new Uint8Array(this.bytes), cc.Texture2D.PixelFormat.RGBA8888, this.drawWidth, this.drawHeigh);
-        var t3 = Date.now();
-        this.spr.setTexture(this.tex);
-        this.display.spriteFrame = this.spr;
-        var t4 = Date.now();
-        console.log(`t4 - t3[${t4 - t3}] t3 - t2[${t3 - t2}] t2 - t1[${t2 - t1}] t1 - t0[${t1 - t0}]`);
+    }
+
+    /**
+     * 刷新光影
+     */
+    refreshLightPenetration () {
+        // 生成光照贴图
+        for (var x = 0; x < this.drawWidth; x++) {
+            for (var y = 0; y < this.drawHeigh; y++) {
+                var i = (y * this.drawWidth + x) * 4;
+                var preA = 255;
+                if (0 < x && 0 < y) {
+                    preA = this.penetrationBytes[((y - 1) * this.drawWidth + (x - 1)) * 4 + 3];
+                };
+                this.penetrationBytes[i + 3] = preA * (1 - this.penetrationBytes[i + 3]);
+                this.penetrationBytes[i + 3] = Math.max(0, this.penetrationBytes[i + 3]);
+            };
+        };
+        // 生成阴影贴图
+        for (var x = 0; x < this.drawWidth; x++) {
+            for (var y = 0; y < this.drawHeigh; y++) {
+                var i = (y * this.drawWidth + x) * 4;
+                this.penetrationBytes[i + 3] = 255 - this.penetrationBytes[i + 3];
+            };
+        };
+    }
+
+    /**
+     * 刷新光照混合
+     */
+    refreshLightBlend () {
+        // 生成光照贴图
+        for (var x = 0; x < this.drawWidth; x++) {
+            for (var y = 0; y < this.drawHeigh; y++) {
+                var i = (y * this.drawWidth + x) * 4;
+                this.blockBytes[i] = this.penetrationBytes[i] * this.penetrationBytes[i + 3] / 255 + (255 - this.penetrationBytes[i + 3]) / 255 * this.blockBytes[i];
+                this.blockBytes[i + 1] = this.penetrationBytes[i + 1] * this.penetrationBytes[i + 3] / 255 + (255 - this.penetrationBytes[i + 3]) / 255 * this.blockBytes[i + 1] ;
+                this.blockBytes[i + 2] = this.penetrationBytes[i + 2] * this.penetrationBytes[i + 3] / 255 + (255 - this.penetrationBytes[i + 3]) / 255 * this.blockBytes[i + 2] ;
+                this.blockBytes[i + 3] = this.penetrationBytes[i + 3] * this.penetrationBytes[i + 3] / 255 + (255 - this.penetrationBytes[i + 3]) / 255 * this.blockBytes[i + 3] ;
+            };
+        };
     }
 
     /**

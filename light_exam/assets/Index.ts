@@ -87,6 +87,16 @@ export default class Index extends cc.Component {
     texHeight: number;
 
     /**
+     * 绘制的宽
+     */
+    drawWidth: number;
+
+    /**
+     * 绘制的高
+     */
+    drawHeigh: number;
+
+    /**
      * 颜色数据集
      */
     bytes: number[] = [];
@@ -105,8 +115,10 @@ export default class Index extends cc.Component {
         // 计算出要绘制的纹理尺寸
         this.horGridCount = Math.ceil(this.node.width / globalConfig.gridPixel);
         this.texWidth = this.horGridCount * globalConfig.gridPixel;
+        this.drawWidth = this.horGridCount * globalConfig.drawPixel;
         this.verGridCount = Math.ceil(this.node.height / globalConfig.gridPixel);
         this.texHeight = this.verGridCount * globalConfig.gridPixel;
+        this.drawHeigh = this.verGridCount * globalConfig.drawPixel;
         // 设置用于绘制的纹理的宽、高
         this.grid.node.width = this.texWidth;
         this.grid.node.height = this.texHeight;
@@ -220,10 +232,17 @@ export default class Index extends cc.Component {
         });
     }
 
+    uint8Arr = new Uint8Array();
+
+    spr = new cc.SpriteFrame();
+
+    tex = new cc.Texture2D();
+
     /**
      * 刷新格子绘制
      */
     refreshGridDraw () {
+        var t0 = Date.now();
         this.bytes.fill(null)
         for (let y = 0; y < dataStorage.vo.gridRec.length; y++) {
             var xLine = dataStorage.vo.gridRec[y];
@@ -239,22 +258,66 @@ export default class Index extends cc.Component {
                 if (colorRec == null) {
                     continue;
                 };
-                for (let localX = 0; localX < globalConfig.gridPixel; localX++) {
-                    for (let localY = 0; localY < globalConfig.gridPixel; localY++) {
-                        var index = ((y * globalConfig.gridPixel + localY) * this.texWidth + x * globalConfig.gridPixel + localX) * 4;
-                        this.bytes[index] = colorRec.r;
-                        this.bytes[index + 1] = colorRec.g;
-                        this.bytes[index + 2] = colorRec.b;
-                        this.bytes[index + 3] = colorRec.a;
+
+                var leftColorTag = this.getColorTag(x - 1, y);
+                var rightColorTag = this.getColorTag(x + 1, y);
+                var bottomColorTag = this.getColorTag(x, y - 1);
+                var topColorTag = this.getColorTag(x, y + 1);
+
+                for (let localX = 0; localX < globalConfig.drawPixel; localX++) {
+                    for (let localY = 0; localY < globalConfig.drawPixel; localY++) {
+                        var index = ((y * globalConfig.drawPixel + localY) * this.drawWidth + x * globalConfig.drawPixel + localX) * 4;
+                        var r = colorRec.r;
+                        var g = colorRec.g;
+                        var b = colorRec.b;
+                        var a = colorRec.a;
+                        if (
+                            (leftColorTag == null && localX == 0)
+                            || (rightColorTag == null && localX == globalConfig.drawPixel - 1)
+                            || (bottomColorTag == null && localY == 0)
+                            || (topColorTag == null && localY == globalConfig.drawPixel - 1)
+                        ) {
+                            r = globalConfig.outLineColor.r;
+                            g = globalConfig.outLineColor.g;
+                            b = globalConfig.outLineColor.b;
+                            a = globalConfig.outLineColor.a;
+                        };
+                        this.bytes[index] = r;
+                        this.bytes[index + 1] = g;
+                        this.bytes[index + 2] = b;
+                        this.bytes[index + 3] = a;
                     };
                 };
             };
         };
-        utilTexture2D.verReverse(this.texWidth, this.texHeight, this.bytes);
-        var tex = new cc.Texture2D();
-        tex.initWithData(new Uint8Array(this.bytes), cc.Texture2D.PixelFormat.RGBA8888, this.texWidth, this.texHeight);
-        var spr = new cc.SpriteFrame();
-        spr.setTexture(tex);
-        this.display.spriteFrame = spr;
+        var t1 = Date.now();
+        utilTexture2D.verReverse(this.drawWidth, this.drawHeigh, this.bytes);
+        var t2 = Date.now();
+        this.tex.initWithData(new Uint8Array(this.bytes), cc.Texture2D.PixelFormat.RGBA8888, this.drawWidth, this.drawHeigh);
+        var t3 = Date.now();
+        this.spr.setTexture(this.tex);
+        this.display.spriteFrame = this.spr;
+        var t4 = Date.now();
+        console.log(`t4 - t3[${t4 - t3}] t3 - t2[${t3 - t2}] t2 - t1[${t2 - t1}] t1 - t0[${t1 - t0}]`);
+    }
+
+    /**
+     * 获取某格子的颜色标记
+     * @param gridX 
+     * @param gridY 
+     * @returns 
+     */
+    getColorTag (gridX: number, gridY: number): number {
+        var xLine = dataStorage.vo.gridRec[gridY]
+        if (xLine == null) {
+            return null;
+        };
+        if (xLine[gridX] == null) {
+            return null;
+        };
+        if (dataStorage.vo.colorPool[xLine[gridX]] == null) {
+            return null;
+        };
+        return xLine[gridX];
     }
 }

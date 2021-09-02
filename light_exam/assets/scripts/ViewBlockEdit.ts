@@ -66,12 +66,14 @@ export default class ViewBlockEdit extends cc.Component {
         this.btnCertain.on(cc.Node.EventType.TOUCH_START, () => {
             this.node.active = false;
             Index.inst.refreshLeftNav();
+            Index.inst.refreshGridDraw();
         });
         this.btnDelete.on(cc.Node.EventType.TOUCH_START, () => {
             this.node.active = false;
-            dataStorage.vo.colorPool.splice(this.editIndex, 1);
-            dataStorage.vo.colorIndex = 0;
+            dataStorage.vo.colorPool[this.editIndex] = null;
+            dataStorage.certainRecord();
             Index.inst.refreshLeftNav();
+            Index.inst.refreshGridDraw();
         });
     }
 

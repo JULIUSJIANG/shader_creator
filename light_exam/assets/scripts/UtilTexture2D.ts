@@ -1,5 +1,8 @@
 const utilTexture2D = {
     grid (width: number, height: number, pixelCount: number, bytes: number[]) {
+        let t0 = Date.now();
+        bytes.length = width * height * 4;
+        let t1 = Date.now();
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 var i = (y * width + x) * 4;
@@ -17,6 +20,20 @@ const utilTexture2D = {
                 };
             };
         };
+        let t2 = Date.now();
+        utilTexture2D.verReverse(width, height, bytes);
+        let t3 = Date.now();
+        var tex = new cc.Texture2D();
+        tex.initWithData(new Uint8Array(bytes), cc.Texture2D.PixelFormat.RGBA8888, width, height);
+        let t4 = Date.now();
+        var spriteFrame = new cc.SpriteFrame();
+        spriteFrame.setTexture(tex);
+        let t5 = Date.now();
+        console.log(`t5 - t4[${t5 - t4}], t4 - t3[${t4 - t3}], t3 - t2[${t3 - t2}], t2 - t1[${t2 - t1}], t1 - t0[${t1 - t0}]`);
+        return spriteFrame;
+    },
+
+    verReverse (width: number, height: number, bytes: number[]) {
         var halfHeight = Math.floor( height / 2 );
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < halfHeight; y++) {
@@ -48,11 +65,6 @@ const utilTexture2D = {
                 ]
             };
         };
-        var tex = new cc.Texture2D();
-        tex.initWithData(new Uint8Array(bytes), cc.Texture2D.PixelFormat.RGBA8888, width, height);
-        var spriteFrame = new cc.SpriteFrame();
-        spriteFrame.setTexture(tex);
-        return spriteFrame;
     }
 }
 

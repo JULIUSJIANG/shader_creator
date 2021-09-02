@@ -11,11 +11,15 @@ import BtnBlock from "./scripts/BtnBlock";
 import ColorRecord from "./scripts/ColorRecord";
 import utilTexture2D from "./scripts/UtilTexture2D";
 import globalConfig from "./scripts/GlobalConfig";
+import BtnBind from "./scripts/BtnBind";
 
 const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class Index extends cc.Component {
+    
+    public static inst: Index;
+
     /**
      * 侧边栏
      */
@@ -56,8 +60,36 @@ export default class Index extends cc.Component {
      */
     @property(cc.Sprite)
     public grid: cc.Sprite = null;
+    /**
+     * 用于展示的精灵
+     */
+    @property(cc.Sprite)
+    public display: cc.Sprite = null;
 
-    public static inst: Index;
+    /**
+     * 水平方向格子数
+     */
+    horGridCount: number;
+
+    /**
+     * 垂直方向格子数
+     */
+    verGridCount: number;
+
+    /**
+     * 纹理宽
+     */
+    texWidth: number;
+
+    /**
+     * 纹理高
+     */
+    texHeight: number;
+
+    /**
+     * 颜色数据集
+     */
+    bytes: number[] = [];
 
     start () {
         Index.inst = this;
@@ -70,26 +102,48 @@ export default class Index extends cc.Component {
             this.refreshLeftNav();
         });
 
+        // 计算出要绘制的纹理尺寸
+        this.horGridCount = Math.ceil(this.node.width / globalConfig.gridPixel);
+        this.texWidth = this.horGridCount * globalConfig.gridPixel;
+        this.verGridCount = Math.ceil(this.node.height / globalConfig.gridPixel);
+        this.texHeight = this.verGridCount * globalConfig.gridPixel;
+        // 设置用于绘制的纹理的宽、高
+        this.grid.node.width = this.texWidth;
+        this.grid.node.height = this.texHeight;
+        // 设置用于表现的纹理的宽、高
+        this.display.node.width = this.texWidth;
+        this.display.node.height = this.texHeight;
+        // 绘制背景格子
         this.grid.spriteFrame = utilTexture2D.grid(
-            globalConfig.designWidth,
-            globalConfig.designHeight,
+            this.texWidth,
+            this.texHeight,
             globalConfig.gridPixel,
-            []
+            this.bytes
         );
 
+        // 监听交互
         let onTouched = (args) => {
             var location = args.currentTouch.getLocation();
-            console.log(`${location.x} ${location.y}`);
+            var gridX = Math.floor(location.x / globalConfig.gridPixel);
+            var gridY = Math.floor(location.y / globalConfig.gridPixel);
+            this.btnList[dataStorage.vo.editTypeIndex].onGrid(gridX, gridY);
         };
         this.grid.node.on(cc.Node.EventType.TOUCH_START, onTouched);
         this.grid.node.on(cc.Node.EventType.TOUCH_MOVE, onTouched);
+
+        this.refreshGridDraw();
     }
+
+    /**
+     * 按钮列表
+     */
+    btnList: BtnBind[];
 
     /**
      * 初始化当前的编辑类型
      */
     initForEditType () {
-        let btnList = [
+        this.btnList = [
             {
                 btn: this.btnBuild,
                 onEnable: () => {
@@ -97,6 +151,17 @@ export default class Index extends cc.Component {
                 },
                 onDisable: () => {
                     this.sideNav.active = false;
+                },
+                onGrid: (gridX: number, gridY: number) => {
+                    var targetColorTag = dataStorage.vo.colorIndex;
+                    if (dataStorage.vo.gridRec[gridY] == null) {
+                        dataStorage.vo.gridRec[gridY] = [];
+                    };
+                    if (dataStorage.vo.gridRec[gridY][gridX] == targetColorTag) {
+                        return;
+                    };
+                    dataStorage.vo.gridRec[gridY][gridX] = targetColorTag;
+                    this.refreshGridDraw();
                 }
             },
             {
@@ -106,11 +171,21 @@ export default class Index extends cc.Component {
                 },
                 onDisable: () => {
                     
+                },
+                onGrid: (gridX: number, gridY: number) => {
+                    if (dataStorage.vo.gridRec[gridY] == null) {
+                        return;
+                    };
+                    if (dataStorage.vo.gridRec[gridY][gridX] == null) {
+                        return;
+                    };
+                    dataStorage.vo.gridRec[gridY][gridX] = null;
+                    this.refreshGridDraw();
                 }
             }
         ];
         let refresh = () => {
-            btnList.forEach(( val, index ) => {
+            this.btnList.forEach(( val, index ) => {
                 val.btn.active = dataStorage.vo.editTypeIndex != index;
                 if (dataStorage.vo.editTypeIndex == index) {
                     val.onEnable();
@@ -120,7 +195,7 @@ export default class Index extends cc.Component {
                 };
             });
         };
-        btnList.forEach(( val, index ) => {
+        this.btnList.forEach(( val, index ) => {
             val.btn.on(cc.Node.EventType.TOUCH_START, () => {
                 dataStorage.vo.editTypeIndex = index;
                 refresh();
@@ -132,13 +207,54 @@ export default class Index extends cc.Component {
     /**
      * 刷新左边栏
      */
-    public refreshLeftNav () {
+    refreshLeftNav () {
         this.blockContainer.removeAllChildren();
         dataStorage.vo.colorPool.forEach(( val, index ) => {
+            if (val == null) {
+                return;
+            };
             var inst = cc.instantiate(this.btnBlockPrefab);
             var com = inst.getComponent(BtnBlock);
             com.init(index);
             this.blockContainer.addChild(inst);
         });
+    }
+
+    /**
+     * 刷新格子绘制
+     */
+    refreshGridDraw () {
+        this.bytes.fill(null)
+        for (let y = 0; y < dataStorage.vo.gridRec.length; y++) {
+            var xLine = dataStorage.vo.gridRec[y];
+            if (xLine == null) {
+                continue;
+            };
+            for (let x = 0; x < xLine.length; x++) {
+                var colorTag = xLine[x];
+                if (colorTag == null) {
+                    continue;
+                };
+                var colorRec = dataStorage.vo.colorPool[colorTag];
+                if (colorRec == null) {
+                    continue;
+                };
+                for (let localX = 0; localX < globalConfig.gridPixel; localX++) {
+                    for (let localY = 0; localY < globalConfig.gridPixel; localY++) {
+                        var index = ((y * globalConfig.gridPixel + localY) * this.texWidth + x * globalConfig.gridPixel + localX) * 4;
+                        this.bytes[index] = colorRec.r;
+                        this.bytes[index + 1] = colorRec.g;
+                        this.bytes[index + 2] = colorRec.b;
+                        this.bytes[index + 3] = colorRec.a;
+                    };
+                };
+            };
+        };
+        utilTexture2D.verReverse(this.texWidth, this.texHeight, this.bytes);
+        var tex = new cc.Texture2D();
+        tex.initWithData(new Uint8Array(this.bytes), cc.Texture2D.PixelFormat.RGBA8888, this.texWidth, this.texHeight);
+        var spr = new cc.SpriteFrame();
+        spr.setTexture(tex);
+        this.display.spriteFrame = spr;
     }
 }

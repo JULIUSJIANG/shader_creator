@@ -17,6 +17,37 @@ const utilTexture2D = {
                 };
             };
         };
+        var halfHeight = Math.floor( height / 2 );
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < halfHeight; y++) {
+                var i = (y * width + x) * 4;
+                var mirrorI = ((height - y - 1) * width + x) * 4;
+                // 上下反转
+                [
+                    bytes[i],
+                    bytes[i + 1],
+                    bytes[i + 2],
+                    bytes[i + 3],
+
+                    bytes[mirrorI],
+                    bytes[mirrorI + 1],
+                    bytes[mirrorI + 2],
+                    bytes[mirrorI + 3],
+                ]
+                = 
+                [
+                    bytes[mirrorI],
+                    bytes[mirrorI + 1],
+                    bytes[mirrorI + 2],
+                    bytes[mirrorI + 3],
+
+                    bytes[i],
+                    bytes[i + 1],
+                    bytes[i + 2],
+                    bytes[i + 3]
+                ]
+            };
+        };
         var tex = new cc.Texture2D();
         tex.initWithData(new Uint8Array(bytes), cc.Texture2D.PixelFormat.RGBA8888, width, height);
         var spriteFrame = new cc.SpriteFrame();

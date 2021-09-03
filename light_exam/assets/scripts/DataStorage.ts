@@ -35,11 +35,13 @@ const dataStorage = {
             return;
         };
         dataStorage.vo.colorIndex = 0;
-        dataStorage.vo.colorPool.forEach(( val, index ) => {
+        for (let i = 0; i < dataStorage.vo.colorPool.length; i++) {
+            let val = dataStorage.vo.colorPool[i];
             if (val != null) {
-                dataStorage.vo.colorIndex = index;
+                dataStorage.vo.colorIndex = i;
+                return;
             };
-        });
+        };
     }
 }
 var val = localStorage.getItem(key);

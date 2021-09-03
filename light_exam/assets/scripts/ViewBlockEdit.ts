@@ -19,15 +19,23 @@ export default class ViewBlockEdit extends cc.Component {
 
     @property(cc.Slider)
     public sliderRed: cc.Slider = null;
+    @property(cc.Node)
+    public redHandle: cc.Node = null;
     
     @property(cc.Slider)
     public sliderGreen: cc.Slider = null;
+    @property(cc.Node)
+    public greenHandle: cc.Node = null;
 
     @property(cc.Slider)
     public sliderBlue: cc.Slider = null;
+    @property(cc.Node)
+    public blueHandle: cc.Node = null;
 
     @property(cc.Slider)
     public sliderAlpha: cc.Slider = null;
+    @property(cc.Node)
+    public aHandle: cc.Node = null;
 
     @property(cc.Slider)
     public sliderPenetration: cc.Slider = null;
@@ -37,6 +45,12 @@ export default class ViewBlockEdit extends cc.Component {
 
     @property(cc.Node)
     public btnDelete: cc.Node = null;
+
+    @property(cc.Node)
+    public pHandle: cc.Node = null;
+
+    @property(cc.Node)
+    public pBg: cc.Node = null;
 
     editIndex: number;
 
@@ -87,9 +101,20 @@ export default class ViewBlockEdit extends cc.Component {
         this.colorPreview.color = new cc.Color(this.editItem.r, this.editItem.g, this.editItem.b);
         this.colorPreview.opacity = this.editItem.a;
         this.sliderRed.progress = this.editItem.r / 255;
+        this.redHandle.color = new cc.Color(this.editItem.r, 0, 0);
+
         this.sliderGreen.progress = this.editItem.g / 255;
+        this.greenHandle.color = new cc.Color(0, this.editItem.g, 0);
+
         this.sliderBlue.progress = this.editItem.b / 255;
+        this.blueHandle.color = new cc.Color(0, 0, this.editItem.b);
+
         this.sliderAlpha.progress = this.editItem.a / 255;
+        this.aHandle.color = new cc.Color(255, 255, 255);
+        this.aHandle.opacity = this.editItem.a;
+
         this.sliderPenetration.progress = this.editItem.p / 255;
+        this.pHandle.opacity = 255 - this.editItem.p;
+        this.pBg.opacity = 255 - this.editItem.p;
     }
 }

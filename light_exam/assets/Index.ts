@@ -109,7 +109,10 @@ export default class Index extends cc.Component {
         this.refreshLeftNav();
         this.btnAddBlock.on(cc.Node.EventType.TOUCH_START, () => {
             dataStorage.vo.colorPool.push(new ColorRecord());
+            dataStorage.vo.colorIndex = dataStorage.vo.colorPool.length - 1;
             this.refreshLeftNav();
+            this.viewBlockEdit.init(dataStorage.vo.colorIndex);
+            this.viewBlockEdit.node.active = true;
         });
 
         // 计算出要绘制的纹理尺寸
